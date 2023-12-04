@@ -98,11 +98,11 @@ The code in this file is adapted from the HPDinterval.mcmc() function in the "co
 
 ## Model-averaged forecasts
 ### ModelAve.R
-This file contains the R code for carrying out model-averaged forecasts. To run this file, one needs all the results files saved in the "Results" folder. These files are very large (over 30G) so not included in this GitHub repository. If you are interested in getting these result files so that you can run this .R file, please email me.
+This file contains the R code for carrying out model-averaged forecasts. To run this file, one needs all the results files saved in the "Results" folder. These files are very large (over 30G) so not included in this GitHub repository. If you are interested in getting these result files so that you can run this .R file, please email me. The current "Results" folder contains all the necessary subfolders and some sample result files. You can run the .R code listed above ModelAve.R to produce the result files as well. After that, you can run ModelAve.R to carry out model-averaged forecast.
 
 ## Plotting the figures used in the paper 
 ### PlotsAndRegression.R
-This file provides step-by-step code to produce all the figures appeared in the manuscript and the supplementary file.
+This file provides step-by-step code to produce all the figures appeared in the manuscript and the supplementary file. To run this file, you will need the model-averaged forecasts saved in .image files. You can follow the instructions above to obtain these files or send me an email to obtain a copy.
 
 
 

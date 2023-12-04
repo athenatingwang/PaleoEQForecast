@@ -93,6 +93,9 @@ n.burnin.mc = 5000
 n.thin.mc=10
 gelman.cutoff <- 1.2
 
+### hpd.interval.R
+The code in this file is adapted from the HPDinterval.mcmc() function in the "coda" R package to produce the Highest Posterior Density intervals. I modified the HPDinterval.mcmc() function so that the input argument can be a vector.
+
 ## Model-averaged forecasts
 ### ModelAve.R
 This file contains the R code for carrying out model-averaged forecasts. To run this file, one needs all the results files saved in the "Results" folder. These files are very large (over 30G) so not included in this GitHub repository. If you are interested in getting these result files so that you can run this .R file, please email me.
@@ -100,6 +103,7 @@ This file contains the R code for carrying out model-averaged forecasts. To run 
 ## Plotting the figures used in the paper 
 ### PlotsAndRegression.R
 This file provides step-by-step code to produce all the figures appeared in the manuscript and the supplementary file.
+
 
 
 

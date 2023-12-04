@@ -3,6 +3,9 @@
 ###########   Code for all plots and regression results  ##########
 ###################################################################
 
+## Set the Working Directory to the "Rcode" folder
+#setwd("/PaleoEQ/Rcode")
+
 library(rjags)
 a <- dir("../DataFinal/chronologies_all_final")
 nfault <- length(a)
@@ -35,7 +38,7 @@ faultname <- c("Alaska PWS Copper", "Alpine Hokuri Ck South Westland", "Awatere 
 
 
 Noccur <- NULL  ## a vector of number of earthquakes along each fault segment
-mean.inter <- sd.inter <- NULL
+mean.inter <- sd.inter <- sd.X.log.sd <- sd.X.log.mean <- sd.X.mean <- NULL
 X.div.Xave <- list()
 sd.X.div.Xave <- matrix(NA,nrow=nfault,ncol=K)
 sd.X.div.Xave.med <- matrix(NA,nrow=nfault,ncol=3)
@@ -70,6 +73,10 @@ for (faulti in (1:nfault)){
 
   sd.X.div.Xave.med[faulti,] <- quantile(sd.X.div.Xave[faulti,],c(0.025,0.5,0.975))
 
+  sd.X.mean[faulti] <- mean(sd.X.div.Xave[faulti,])
+  sd.X.log.mean[faulti] <- mean(log(sd.X.div.Xave[faulti,]))
+  sd.X.log.sd[faulti] <- sd(log(sd.X.div.Xave[faulti,]))
+  
   Noccur[faulti] <- N  
 }
 
@@ -169,7 +176,7 @@ faultname[ind.Pois]
 
 
 #####################################################################
-###  Supplementary Fig. 4 SD of X/Xave for faults with the same bestM
+###  Supplementary Fig. 1 SD of X/Xave for faults with the same bestM
 #####################################################################
 
 postscript("XdivXaveSDbestM-rate.eps",paper="special",width=5*1.6*1.2,height=5*1.5*1.2,
@@ -179,6 +186,7 @@ par(mar=c(4.5,4.5,1,1))
 
 sd.X.div.Xave.weib <- sd.X.div.Xave.med[ind.weib,]
 sd.X.div.Xave.weib.sort <- sd.X.div.Xave.weib[order(sd.X.div.Xave.weib[,2]),]
+
 plot(1:length(ind.weib),sd.X.div.Xave.weib.sort[,1],ylim=c(0,1.3),type="n",
      xlab="Index",
      ylab="SD of scaled inter-event time",cex.axis=1.7,cex.lab=1.7)
@@ -192,6 +200,7 @@ text(20,1.2,"(a)",cex=1.5)
 
 sd.X.div.Xave.gam <- sd.X.div.Xave.med[ind.gam,]
 sd.X.div.Xave.gam.sort <- sd.X.div.Xave.gam[order(sd.X.div.Xave.gam[,2]),]
+
 plot(1:length(ind.gam),sd.X.div.Xave.gam.sort[,1],ylim=c(0,1.3),type="n",
      xlab="Index",
      ylab="SD of scaled inter-event time",cex.axis=1.7,cex.lab=1.7)
@@ -206,6 +215,7 @@ text(3,1.2,"(b)",cex=1.5)
 
 sd.X.div.Xave.bpt <- sd.X.div.Xave.med[ind.bpt,]
 sd.X.div.Xave.bpt.sort <- sd.X.div.Xave.bpt[order(sd.X.div.Xave.bpt[,2]),]
+
 plot(1:length(ind.bpt),sd.X.div.Xave.bpt.sort[,1],ylim=c(0,2.5),type="n",
      xlab="Index",
      ylab="SD of scaled inter-event time",cex.axis=1.7,cex.lab=1.7)
@@ -234,21 +244,87 @@ text(8,2,"(d)",cex=1.5)
 
 
 
-pois.lambda <- params$pois.lambda[,2]
-log10rate <- log10(pois.lambda)
+pois.lamb <- params$pois.lambda[,2]
+log10rate <- log10(pois.lamb)
 
 sd.X.div.median <- sd.X.div.Xave.med[,2]
 
-plot(log10rate,(sd.X.div.median),xlab="Rate of earthquake occurrence",
+new.log10rate <- seq(min(log10rate),max(log10rate),length.out=100)
+
+##### Bayesian method log sd.X ~ normal
+sd.scaled.interE.reg <- "
+model{
+   for (j in 1:nfault){ # jth fault
+      # Model as follows
+      # 1. (log) Estimated value ~ Normal((log) True Value, Estimation error (log scale))
+      sd.X.log.mean[j] ~ dnorm(sd.mu[j], 1/sd.X.log.sd[j]/sd.X.log.sd[j])
+      
+      # 2. (log) True value ~ Normal(Process average, Process variation) 
+      sd.mu[j] ~ dnorm(mu[j], tau.process)
+      
+      # 3. Deterministic Process average 
+      mu[j] <- a + b * log10rate[j]
+   }
+      
+   for (i in 1:100){
+     exp.new.mu[i] <- exp(a + b * new.log10rate[i])
+   }
+   a ~ dnorm(0,1.0E-06)
+   b ~ dnorm(0,1.0E-06)
+
+   tau.process ~ dt(0,0.04,3)T(0,)
+   sd.process <- 1/sqrt(tau.process)
+}
+"
+
+library(R2jags)
+
+jagsdata <- list("sd.X.log.mean", "log10rate", "nfault","new.log10rate",
+                 "sd.X.log.sd")
+param <- c("a","b","exp.new.mu","sd.process")
+
+system.time(
+  sd.X.rate <- jags(data=jagsdata, inits=NULL,
+                    parameters.to.save = param,n.chain=3,
+                    n.iter=55000, n.thin=20, n.burnin=5000,
+                    model.file = textConnection(sd.scaled.interE.reg))
+)
+
+# Convert to an MCMC object
+mod.mcmc <- as.mcmc(sd.X.rate)
+
+mod.mat <- as.matrix(mod.mcmc)
+mod.dat <- as.data.frame(mod.mat)
+
+
+## Quantile of exp.new.mu, regression line plus 95% CI
+expmu.quant <- matrix(NA,nrow=100,ncol=3)
+for (i in 1:100){
+  temp.expmu <- eval(parse(text=paste('mod.dat$"exp.new.mu[',i,']"',sep="")))
+  expmu.quant[i,] <- quantile(temp.expmu,c(0.025,0.5,0.975))
+}
+
+## Quantile of coefficient exp(mub)
+bm <- eval(parse(text=paste('mod.dat$"b"',sep="")))
+b.quant <- quantile(bm,c(0.025,0.05,0.5,0.95,0.975))
+b.quant
+#2.5%        5%       50%       95%     97.5% 
+#-0.3274529 -0.3069638 -0.2119224 -0.1172644 -0.1009893 
+
+
+plot(log10rate,sd.X.div.median,xlab="Rate of earthquake occurrence",
      ylab="SD of scaled inter-event time",cex.axis=1.7,cex.lab=1.7,
      cex=1.5,xlim=c(-6,-1.5),axes=F)
+matlines(new.log10rate,expmu.quant,col="red",lwd=1.5,lty=c(2,1,2))
 axis(1,(-6):(-2),c(expression(10^-6),expression(10^-5),
                    expression(10^-4),expression(10^-3),
                    expression(10^-2)),cex.axis=1.7)
-axis(2,(-1):2,round(exp((-1):2),digits=1),cex.axis=1.7)
+axis(2,cex.axis=1.7)
 text(-3.5,log(9),"(e)",cex=1.5)
 box()
 dev.off()
+
+
 
 
 
@@ -391,11 +467,11 @@ model{
 library(R2jags)
 X <- mod.best.no
 jagsdata <- list("Noccur", "X", "nfault")
-params <- c("a","b[2]","b[3]","b[4]","b[5]")
+param <- c("a","b[2]","b[3]","b[4]","b[5]")
 
 system.time(
   BM.Noccur <- jags(data=jagsdata, inits=NULL,
-                    parameters.to.save = params,n.chain=3,
+                    parameters.to.save = param,n.chain=3,
                     n.iter=30000, n.thin=20, n.burnin=10000,
                     model.file = textConnection(NoccurBestMod))
 )
@@ -471,8 +547,8 @@ faultname[which(Forep50quantile$p50modAve.quant[,3]<=0.00001)]
 
 
 #########################################################################
-######   On average, faults along a plate boundary are about 41 (95% CI 
-######   (10,162)) times more likely to have a large earthquake in 
+######   On average, faults along a plate boundary are about 32 (95% CI 
+######   (9,125)) times more likely to have a large earthquake in 
 ######   the next 50 years than intraplate faults.
 #########################################################################
 ###  Load meta data on tectonic settings and faulting style.
@@ -523,15 +599,17 @@ for (faulti in 1:nfault){
   p50modAve.mean[faulti] <- mean(p50modAve.vec)
   p50modAve.sd[faulti] <- sd(p50modAve.vec)
   lp50modAve.sd[faulti] <- sd(log(p50modAve.vec))
+  lp50modAve.mean[faulti] <- mean(log(p50modAve.vec))
 }
 
-##### Bayesian method truncated lognormal (0,1)
-p50lnorm <- "
+##### Bayesian method truncated lognormal (0,1), 
+##### i.e., log(Estimated)~ normal (-\infinity,0)
+lp50norm <- "
 model{
     for (j in 1:nfault){ # jth fault
       # Model as follows
-      # 1. Estimated value ~ logNormal( True Value (log), Estimation error (log scale))
-      p50modAve.mean[j] ~ dlnorm(lp50[j], 1/lp50modAve.sd[j]/lp50modAve.sd[j])T(0,1)
+      # 1. (log) Estimated value ~ Normal((log) True Value, Estimation error (log scale))
+      lp50modAve.mean[j] ~ dnorm(lp50[j], 1/lp50modAve.sd[j]/lp50modAve.sd[j])T(,0)
       
       # 2. (log) True value ~ Normal(Process average, Process variation) 
       lp50[j] ~ dnorm(mu[j], tau.process)
@@ -549,19 +627,20 @@ model{
 }
 "
 
+
 library(R2jags)
-jagsdata <- list("p50modAve.mean", "nfault","tecreg12","lp50modAve.sd")
-params <- c("a","b[2]","expb", "sd.process")
+jagsdata <- list("lp50modAve.mean", "nfault","tecreg12","lp50modAve.sd")
+param <- c("a","b[2]","expb", "sd.process")
 
 system.time(
   p50.tec <- jags(data=jagsdata, inits=NULL,
-                   parameters.to.save = params,n.chain=3,
+                   parameters.to.save = param,n.chain=3,
                    n.iter=55000, n.thin=20, n.burnin=5000,
-                   model.file = textConnection(p50lnorm))
+                   model.file = textConnection(lp50norm))
 )
 
 # Convert to an MCMC object
-mod.mcmc <- as.mcmc(lp50.tec)
+mod.mcmc <- as.mcmc(p50.tec)
 
 
 plot(mod.mcmc,trace=TRUE)
@@ -576,13 +655,13 @@ mod.dat <- as.data.frame(mod.mat)
 
 ## Quantile of coefficient exp(muc[k])
 bm2 <- eval(parse(text=paste('mod.dat$"b[2]"',sep="")))
-expb.quant <- quantile(exp(bm2),c(0.025,0.05,0.5,0.7,0.95,0.975))
+expb.quant <- quantile(exp(bm2),c(0.025,0.05,0.5,0.95,0.975))
 expb.quant 
-## 2.5%        5%       50%       70%       95%     97.5% 
-##10.38133  12.91447  41.06738  58.87504 129.97939 162.17024 
+## 2.5%        5%       50%       95%     97.5% 
+##8.850667  10.844716  32.296586  99.814571 125.394191 
 
 expb <- eval(parse(text=paste('mod.dat$expb',sep="")))
-expb.quant <- quantile(expb,c(0.025,0.05,0.5,0.7,0.95,0.975))
+expb.quant <- quantile(expb,c(0.025,0.05,0.5,0.95,0.975))
 expb.quant 
 
 #####################################################################
@@ -884,9 +963,9 @@ params$bpt.alpha[ind.cluster,]
 ###    setting, faulting type, and the number of earthquakes of each of 
 ###.   the 93 fault segments suggests that when the earthquake rate increases 
 ###.   10 fold (e.g., from 0.0001 to 0.001), the shape parameter of the 
-###.   Weibull renewal process increases by about 23.8% (95% CI: 5.0%--45.4%).
+###.   Weibull renewal process increases by about 24% (95% CI: 5%--45%).
 ###.   ...On average, the Weibull shape parameter for reverse faults is 
-###    about 69.0% (95% CI: 45.9%-104.3%) of that for normal faults, 
+###    about 69% (95% CI: 46%-104%) of that for normal faults, 
 ###.   suggesting that large earthquakes recur more periodically on normal 
 ###.   faults than on reverse faults. 
 #########################################################################
@@ -990,14 +1069,14 @@ library(R2jags)
 
 jagsdata <- list("weib.lalpha.mean", "log10rate", "nfault","Noccur","Tec_reg",
                  "Fault_st","weib.lalpha.sd")
-params <- c("a","b","c[2]","c[3]","c[4]","d[2]","d[3]",
+param <- c("a","b","c[2]","c[3]","c[4]","d[2]","d[3]",
             "g","expb","expc[2]","expc[3]","expc[4]",#"tau",
             "expd[2]","expd[3]","expg", "sd.process")
 
 
 system.time(
   weibshape <- jags(data=jagsdata, inits=NULL,
-                    parameters.to.save = params,n.chain=3,
+                    parameters.to.save = param,n.chain=3,
                     n.iter=55000, n.thin=20, n.burnin=5000,
                     model.file = textConnection(weibShapetecreg))
 )
@@ -1065,7 +1144,7 @@ expb.quant
 
 
 #####################################################################
-###  Supplementary Fig. 5 Posterior distributions of the parameters of the regression mode
+###  Supplementary Fig. 6 Posterior distributions of the parameters of the regression mode
 #####################################################################
 
 postscript("PosteriorDensWeibShapeReg.eps",paper="special",width=5*1.6*1.5,height=5*1.6,
@@ -1135,11 +1214,11 @@ dev.off()
 ###  For each fault, we removed the last event in the record to carry 
 ###  out retrospective forecasts using both the model-averaging and 
 ###  single-best model approaches. The single-best model remained the 
-###  same as that for the full dataset for 54\% of the fault segments 
+###  same as that for the full dataset for 54% of the fault segments 
 ### (50 out of the 93). It appears that the single-best model is more 
 ###  likely to change for fault segments with fewer recorded earthquakes.
 ###  On average, the number of earthquakes along the fault segments 
-###  for which the single-best model changed is about 25\% (95\% CI: 6\%-40\%) 
+###  for which the single-best model changed is about 25% (95% CI: 6%-40%) 
 ### fewer than that for those fault segments for which the single-best model 
 ### remained the same. 
 ###########################################################################
@@ -1201,11 +1280,11 @@ model{
 
 library(R2jags)
 jagsdata <- list("Noccur", "bestM.same", "nfault")
-params <- c("a","b[2]","size","theta","scaleparam")
+param <- c("a","b[2]","size","theta","scaleparam")
 
 system.time(
   NB.Noccur <- jags(data=jagsdata, inits=NULL,
-                    parameters.to.save = params,n.chain=3,
+                    parameters.to.save = param,n.chain=3,
                     n.iter=10000, n.thin=10, n.burnin=5000,
                     model.file = textConnection(NoccurRetroBestMsame))
 )
@@ -1233,7 +1312,7 @@ expb.quant <- quantile(exp(bm),c(0.025,0.05,0.5,0.95,0.975))
 
 
 ##########################################################################
-##  Figure 5 shows the 95\% credible intervals of the forecast of the last 
+##  Figure 5 shows the 95% credible intervals of the forecast of the last 
 ##  earthquake occurrence time, with 0 representing the mean of the recorded 
 ##  last earthquake occurrence time. Out of the 93 fault segments
 ##########################################################################
@@ -1436,7 +1515,7 @@ dev.off()
 
 
 #####################################################################
-###   Supplementary Fig. 1-3 forecasts from all models (since 2022)
+###   Supplementary Fig. 2-4 forecasts from all models (since 2022)
 #####################################################################
 load(paste("../Results/ModAveForeRes.image",sep=""))
 
@@ -1647,7 +1726,7 @@ dev.off()
 
 
 #####################################################################
-###   Supplementary Fig MSE Retro forecast
+###   Supplementary Figs 7-9: MSE Retro forecast
 #####################################################################
 
 mseres <- read.csv("../Results/MAforeBiasVarMSE.csv")
@@ -1775,11 +1854,6 @@ postscript("RetroMA-BMforeMSErelativeVSnoccur.eps",paper="special",
            width=5*cos (35.4/180*pi)/0.612,height=5,onefile = TRUE, horizontal = FALSE)
 par(mfrow=c(1,1))
 par(mar=c(4.5,4.5,1,1))
-#hist(log10(abs(poismse-MAmse))*sign(poismse-MAmse),main="",
-#     xlab="Difference in mean squared error",ylab="Frequency",cex.axis=1.7,
-#     cex.lab=1.7,axes=F)
-#axis(1,at=c(-10,-5,0,5,10),c(expression(-10^10),expression(-10^5),
-#                             0,expression(10^5),expression(10^10)),cex.axis=1.7)
 
 plot(Noccur-1,log(MSEreldiff),xlab="Number of earthquakes",
      ylab="MSE Best Model/MSE MA",cex.axis=1.7,cex.lab=1.7,ylim=c(log(0.5),log(2)),
@@ -1795,10 +1869,46 @@ sort((MSEreldiff[Noccur==5]))
 
 
 
+#####################################################################
+###   Supplementary Fig probablistic forecast comparison
+#####################################################################
+prob.fore <- read.csv("../DataFinal/SupplementaryTable1.csv")
+head(prob.fore)
+
+legend.text <- c("Our study","Previous studies")
+Index <- (1:93)[!is.na(prob.fore$Forecast.30..or.50..yr.mean.prob....)]
+lind <- length(Index)
+postscript("ForecastProbCompare.eps",paper="special",
+           width=5*cos (35.4/180*pi)/0.612*1.2,height=5,onefile = TRUE, horizontal = FALSE)
+par(mfrow=c(1,1))
+par(mar=c(4.5,4.5,1,1))
+plot(1:lind,prob.fore$MA.forecast.50.yr.median.prob.this.study....[!is.na(prob.fore$Forecast.30..or.50..yr.mean.prob....)],
+     axes=F,type="n",ylim=c(0,80),ylab="Forecast probabilities",
+     xlab="Fault index",cex.lab=1.5)
+axis(1,1:lind,Index,cex.axis=1.1)
+axis(1,(1:lind)[7:17],59:69,cex.axis=1.1,col.axis="blue")
+axis(2,seq(0,80,10),seq(0,0.8,0.1),cex.axis=1.2)
+box()
+legend("topleft",legend.text,pch=c(16,16),col=c(1,2),cex=1.2)
+
+points(1:lind,
+       prob.fore$MA.forecast.50.yr.median.prob.this.study....[!is.na(prob.fore$Forecast.30..or.50..yr.mean.prob....)],
+       cex=1,pch=16,col=1)
+arrows(x0=1:lind,
+       y0=prob.fore$X2.50.[!is.na(prob.fore$Forecast.30..or.50..yr.mean.prob....)], 
+       x1=1:lind,
+       y1=prob.fore$X97.50.[!is.na(prob.fore$Forecast.30..or.50..yr.mean.prob....)],  code=3, angle=90, 
+       length=0.07, col=1, lwd=1.5)
+
+points(1:lind+0.2,
+       prob.fore$Forecast.30..or.50..yr.mean.prob....[!is.na(prob.fore$Forecast.30..or.50..yr.mean.prob....)],
+       cex=1,pch=16,col=2)
+arrows(x0=1:lind+0.2,y0=prob.fore$min..For.Hokuri.Creek..this.is.2.5..percentile.[!is.na(prob.fore$Forecast.30..or.50..yr.mean.prob....)], 
+       x1=1:lind+0.2,y1=prob.fore$max..For.Hokuri.Creek..this.is.97.5..percentile.[!is.na(prob.fore$Forecast.30..or.50..yr.mean.prob....)],  
+       code=3, angle=90, 
+       length=0.07, col=2, lwd=1.5)
+dev.off()
 
 
 
 
-
-
-  

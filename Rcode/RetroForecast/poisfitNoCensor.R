@@ -50,7 +50,8 @@ model{
 ### time using MCMC
 
 
-poisfit <- function(faulti,inter.NA, t.occ, N, K){
+poisfit <- function(faulti,inter.NA, t.occ, N, K,
+                    n.iter.mc = 5010000,n.burnin.mc = 10000,n.thin.mc=1000){
 	library(lattice)
 	library(R2jags)	
 	jagsdata <- list("inter.NA", "t.occ", "N", "K")
@@ -68,7 +69,7 @@ poisfit <- function(faulti,inter.NA, t.occ, N, K){
 
 	mod <- jags(data = jagsdata, inits = inits,
 		            parameters.to.save = params, n.chains = 3,
-			          n.iter = 5010000, n.burnin = 10000, n.thin=1000,
+	            n.iter = n.iter.mc, n.burnin = n.burnin.mc,n.thin=n.thin.mc,
 	            model.file = textConnection(poisNoCensor.jags))
 	
 	# Convert to an MCMC object

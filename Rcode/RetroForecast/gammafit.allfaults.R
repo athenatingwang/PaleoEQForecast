@@ -6,6 +6,29 @@ a <- dir("../../DataFinal/chronologies_all_final")
 nfault <- length(a)
 
 K = 100
+
+## Setting the values for n.inter, n.burnin, n.thin and gelman.cutoff for the jags run. 
+## The values used in the manuscript are 
+n.iter.mc = 5010000 
+n.burnin.mc = 10000
+n.thin.mc=1000 
+gelman.cutoff <- 1.02
+## which are the default values in the bptfit.R file. 
+## If one wants to test if the code runs properly, then use the following three
+## lines to reduce the computational time, which most likely will not result in
+## convergence of the MCMC chains, but can test that the code is running.
+#n.iter.mc = 6000
+#n.burnin.mc = 1000
+#n.thin.mc=1
+#gelman.cutoff <- 2
+
+## For convergence of MCMC chains, a minimum of the following values are suggested.
+# n.iter.mc = 55000
+# n.burnin.mc = 5000
+# n.thin.mc=10
+# gelman.cutoff <- 1.2
+
+
 gelman <- matrix(NA,nrow=nfault,ncol=7)
 
 
@@ -48,7 +71,7 @@ gelman <- matrix(NA,nrow=nfault,ncol=7)
 ## This line is used if we use supercomputer .sl file to run different fault 
 ## segments in parallel.
 
-i = as.integer(system('echo $KK', intern=T))
+#i = as.integer(system('echo $KK', intern=T))
 
 
 ## If there is no access to supercomputers, then one can use a loop on a PC
@@ -56,7 +79,7 @@ i = as.integer(system('echo $KK', intern=T))
 ## n.thin=1000 are used in the gammafitNoCensor.R file.
 
 
-#for (i in 1:nfault){
+for (i in 1:nfault){
 
 data = read.csv(paste('../../DataFinal/chronologies_all_final/',a[i],sep=''), header=FALSE)
 
@@ -95,13 +118,13 @@ catched <- FALSE
 while(!catched) 
 {
  tryCatch({
-   mod <- gammafit(i,inter.NA, t.occ, N, K)
+   mod <- gammafit(i,inter.NA, t.occ, N, K,n.iter.mc,n.burnin.mc,n.thin.mc)
    catched = TRUE
    }, error=function(e){})
  print(catched)
 }
 gelman <- gelman.diag(mod[,c(1:6,6+K)])$psrf[,1]
-if (all(gelman<=1.02)) gelman.1.2 = TRUE
+if (all(gelman<=gelman.cutoff)) gelman.1.2 = TRUE
 }
 
 
@@ -122,6 +145,9 @@ hpd.gamma <- list("hpd"=hpd,"hpd.t.occ.N"=hpd.t.occ.N)
 
 write.csv(t(gelman),file=paste("../../Results/GammaSimRes2/GelmanDiagGamma",i,".csv",sep=""))
 save(hpd.gamma,file=paste("../../Results/GammaSimRes2/HPDGamma",i,".image",sep=""))
+
+
+}
 
 
 q()

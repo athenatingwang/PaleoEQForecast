@@ -3,8 +3,11 @@
 The computational code for fitting each renewal process model and carrying out model-averaging for the paper: Wang, T., Griffin, J., Brenna, M., Fletcher, D., Zeng, J., Stirling, M., Dillingham, P. and Kang, J. (2023) Earthquake forecasting from paleoseismic records, under review.
 
 All folders can be downloaded and saved in the same main folder. Inside the folder "DataFinal", the users should create another folder named "chronologies_all_final". For example, if you use "PaleoEQ" as the main folder, then you should have the following folder paths:
+
 /PaleoEQ/Rcode/
+
 /PaleoEQ/Results/
+
 /PaleoEQ/DataFinal/chronologies_all_final/
 
 The .csv data files can be obtained from https://github.com/griffij/QuakeRates. The .csv data files should be downloaded and saved in the folder "/DataFinal/chronologies_all_final/".  

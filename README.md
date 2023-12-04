@@ -104,7 +104,8 @@ This file contains the R code for carrying out model-averaged forecasts. To run 
 ### PlotsAndRegression.R
 This file provides step-by-step code to produce all the figures appeared in the manuscript and the supplementary file. To run this file, you will need the model-averaged forecasts saved in .image files. You can follow the instructions above to obtain these files or send me an email to obtain a copy.
 
-
+## Retrospective forecasts for assessment of prediction error
+The files in the folder "/Rcode/RetroForecast/" are for carrying out retrospective forecasts. They are very similar to the files bptfit.allfaults.R, gammafit.allfaults.R, lnormfit.allfaults.R, poisfit.allfaults.R, weibfit.allfaults.R and ModelAve.R in the folder "/Rcode/". These files all use the values used in the manuscript so it will take a long while to run. If you are only interested in checking if the code runs, you can reset the values for n.iter.mc, n.burnin.mc, n.thin.mc, and gelman.cutoff.
 
 
 

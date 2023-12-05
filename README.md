@@ -10,7 +10,7 @@ All folders can be downloaded and saved in the same main folder. Inside the fold
 
 /PaleoEQ/DataFinal/chronologies_all_final/
 
-The .csv data files can be downloaded from https://github.com/griffij/QuakeRates. The .csv data files should be downloaded and saved in the folder "/DataFinal/chronologies_all_final/".  
+The .csv data files can be downloaded from https://github.com/griffij/QuakeRates/tree/master/chronologies_all_final. The .csv data files should be downloaded and saved in the folder "/DataFinal/chronologies_all_final/".  
 
 ## Fitting each renewal process to the Monte Carlo samples of the earthquake ocurrence times from all 93 fault segments
 ## Fitting the BPT renewal process 

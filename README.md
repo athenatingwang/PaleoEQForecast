@@ -12,6 +12,9 @@ All folders can be downloaded and saved in the same main folder. Inside the fold
 
 The .csv data files can be downloaded from https://github.com/griffij/QuakeRates/tree/master/chronologies_all_final. The .csv data files should be downloaded and saved in the folder "/DataFinal/chronologies_all_final/".  
 
+## Software dependencies 
+To run the R functions and JAGS code, one need to use R >= 4.3.0, and the following R packages: "R2jags", "lattice", "actuar", "MCMCvis", "rjags", "wesanderson", "maps", "coda", "bayesplot", "ggplot2", "rstanarm", "grid".
+
 ## Fitting each renewal process to the Monte Carlo samples of the earthquake ocurrence times from all 93 fault segments
 ## Fitting the BPT renewal process 
 ### bptfit.allfaults.R

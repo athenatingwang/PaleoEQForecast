@@ -8,16 +8,31 @@ All folders can be downloaded and saved in the same main folder. Inside the fold
 
 /PaleoEQ/Results/
 
+/PaleoEQ/Demo/
+
+/PaleoEQ/ResultsDemo/
+
 /PaleoEQ/DataFinal/chronologies_all_final/
 
 The .csv data files can be downloaded from https://github.com/griffij/QuakeRates/tree/master/chronologies_all_final. The .csv data files should be downloaded and saved in the folder "/DataFinal/chronologies_all_final/".  
 
+## The folder Demo contains the same .R files as the folder Rcode. The only difference is that these files use very small values for the MCMC iterations and thus take much less time to run. Due to this reason, if you run the Demo files you may encounter error messages when runnning the ModelAve.R file as the MCMC chains are not converged. The ResultsDemo.zip file contains all the sample results for which the ModelAve.R can run without errors. 
+
+
 ## Software dependencies 
 To run the R functions and JAGS code, one need to use R >= 4.3.0, and the following R packages: "R2jags", "lattice", "actuar", "MCMCvis", "rjags", "wesanderson", "maps", "coda", "bayesplot", "ggplot2", "rstanarm", "grid".
 
+## Run time and memory requirement
+### "Demo" folder
+To run the R functions and JAGS code in the files bptfit.allfaults.R, gammafit.allfaults.R, lnormfit.allfaults.R, poisfit.allfaults.R,and weibfit.allfaults.R in the "Demo" folder with n.iter.mc = 6000, n.burnin.mc = 1000, n.thin.mc = 100, and K = 50 MC samples, it will take less than 30 minutes on a standard computer (each). The memory requirement for running the ModelAve.R and ModelAveRetro.R files using the output from n.iter.mc = 6000, n.burnin.mc = 1000, n.thin.mc = 100, and K = 50 MC samples is < 2G. Instructions are in each .R file.
+
+### "Rcode" folder
+To run the R functions and JAGS code in the files bptfit.allfaults.R, gammafit.allfaults.R, lnormfit.allfaults.R, poisfit.allfaults.R,and weibfit.allfaults.R in ##"Rcode"## folder with n.iter.mc = 5010000, n.burnin.mc = 10000, n.thin.mc = 1000, it will take more than four weeks on a standard computer (each). The memory requirement for running the ModelAve.R and ModelAveRetro.R files using the output from n.iter.mc = 5010000, n.burnin.mc = 10000, n.thin.mc = 1000 is > 64G. It's faster to run these on supercomputers. Instructions are in each .R file.
+
+
 ## Fitting each renewal process to the Monte Carlo samples of the earthquake ocurrence times from all 93 fault segments
 ## Fitting the BPT renewal process 
-### bptfit.allfaults.R
+### bptfit.allfaults.R in "Rcode" and "Demo" folders
 This file sources bptfit.R and fits a BPT renewal process to the Monte Carlo samples of the earthquake occurrence times from each fault segment. The default is to use a loop on a PC (the lines within "for (i in 1:nfault){...}") to fit the model to all 93 fault segments. This will take a long time to finish if n.iter.mc = 5010000, n.burnin.mc = 10000, n.thin.mc = 1000 are used, which are the values we used in the manuscript.
 
 If one wants to test if the code runs properly, then use the following three lines to reduce the computational time, which most likely will not result in convergence of the MCMC chains, but can test that the code is running. These are the current values set in the bptfit.allfaults.R file.
@@ -33,7 +48,7 @@ n.thin.mc = 10;
 gelman.cutoff = 1.2
 
 ## Fitting the gamma renewal process 
-### gammafit.allfaults.R
+### gammafit.allfaults.R in "Rcode" and "Demo" folders
 This file sources gammafit.R and fits a gamma renewal process to the Monte Carlo samples of the earthquake occurrence times from each fault segment. The default is to use a loop on a PC (the lines within "for (i in 1:nfault){...}") to fit the model to all 93 fault segments. This will take a long time to finish if n.iter.mc = 5010000, n.burnin.mc = 10000, n.thin.mc = 1000 are used, which are the values we used in the manuscript.
 
 If one wants to test if the code runs properly, then use the following three lines to reduce the computational time, which most likely will not result in convergence of the MCMC chains, but can test that the code is running. These are the current values set in the gammafit.allfaults.R file.
@@ -49,7 +64,7 @@ n.thin.mc = 10;
 gelman.cutoff = 1.2
 
 ## Fitting the lognormal renewal process 
-### lnormfit.allfaults.R
+### lnormfit.allfaults.R in "Rcode" and "Demo" folders
 This file sources lnormfit.R and fits a lognormal renewal process to the Monte Carlo samples of the earthquake occurrence times from each fault segment. The default is to use a loop on a PC (the lines within "for (i in 1:nfault){...}") to fit the model to all 93 fault segments. This will take a long time to finish if n.iter.mc = 5010000, n.burnin.mc = 10000, n.thin.mc = 1000 are used, which are the values we used in the manuscript.
 
 If one wants to test if the code runs properly, then use the following three lines to reduce the computational time, which most likely will not result in convergence of the MCMC chains, but can test that the code is running. These are the current values set in the lnormfit.allfaults.R file.
@@ -65,7 +80,7 @@ n.thin.mc = 10;
 gelman.cutoff = 1.2
 
 ## Fitting the Poisson process 
-### poisfit.allfaults.R
+### poisfit.allfaults.R in "Rcode" and "Demo" folders
 This file sources poisfit.R and fits a Poisson process to the Monte Carlo samples of the earthquake occurrence times from each fault segment. The default is to use a loop on a PC (the lines within "for (i in 1:nfault){...}") to fit the model to all 93 fault segments. This will take a long time to finish if n.iter.mc = 5010000, n.burnin.mc = 10000, n.thin.mc = 1000 are used, which are the values we used in the manuscript.
 
 If one wants to test if the code runs properly, then use the following three lines to reduce the computational time, which most likely will not result in convergence of the MCMC chains, but can test that the code is running. These are the current values set in the poisfit.allfaults.R file.
@@ -81,7 +96,7 @@ n.thin.mc = 10;
 gelman.cutoff = 1.2
 
 ## Fitting the Weibull renewal process 
-### weibfit.allfaults.R
+### weibfit.allfaults.R in "Rcode" and "Demo" folders
 This file sources weibfit.R and fits a Weibull renewal process to the Monte Carlo samples of the earthquake occurrence times from each fault segment. The default is to use a loop on a PC (the lines within "for (i in 1:nfault){...}") to fit the model to all 93 fault segments. This will take a long time to finish if n.iter.mc = 5010000, n.burnin.mc = 10000, n.thin.mc = 1000 are used, which are the values we used in the manuscript.
 
 If one wants to test if the code runs properly, then use the following three lines to reduce the computational time, which most likely will not result in convergence of the MCMC chains, but can test that the code is running. These are the current values set in the weibfit.allfaults.R file.

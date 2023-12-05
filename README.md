@@ -93,7 +93,7 @@ However, after testing the code, for convergence of MCMC chains, a minimum of th
 n.iter.mc = 55000;
 n.burnin.mc = 5000;
 n.thin.mc = 10;
-gelman.cutoff = 1.2
+gelman.cutoff = 1.2 
 
 ## Fitting the Weibull renewal process 
 ### weibfit.allfaults.R in "Rcode" and "Demo" folders

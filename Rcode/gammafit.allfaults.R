@@ -1,6 +1,9 @@
 # This file sources gammafit.R and fits a gamma renewal process 
 # to the occurrence times from each fault segment.
 
+## Set the Working Directory to the "Rcode" folder
+#setwd("/PaleoEQ/Rcode")
+
 # Load data
 a <- dir("../DataFinal/chronologies_all_final")
 nfault <- length(a)
@@ -9,25 +12,24 @@ K = 100
 
 ## Setting the values for n.inter, n.burnin, n.thin and gelman.cutoff for the jags run. 
 ## The values used in the manuscript are 
-# n.iter.mc = 5010000 
-# n.burnin.mc = 10000
-# n.thin.mc=1000 
-# gelman.cutoff <- 1.02
+n.iter.mc = 5010000 
+n.burnin.mc = 10000
+n.thin.mc = 1000 
+gelman.cutoff = 1.02
 ## which are the default values in the bptfit.R file. 
-
 ## If one wants to test if the code runs properly, then use the following three
 ## lines to reduce the computational time, which most likely will not result in
 ## convergence of the MCMC chains, but can test that the code is running.
-n.iter.mc = 6000
-n.burnin.mc = 1000
-n.thin.mc=1
-gelman.cutoff <- 2
+#n.iter.mc = 6000
+#n.burnin.mc = 1000
+#n.thin.mc = 100
+#gelman.cutoff = 2
 
 ## For convergence of MCMC chains, a minimum of the following values are suggested.
 # n.iter.mc = 55000
 # n.burnin.mc = 5000
-# n.thin.mc=10
-# gelman.cutoff <- 1.2
+# n.thin.mc = 10
+# gelman.cutoff = 1.2
 
 
 gelman <- matrix(NA,nrow=nfault,ncol=7)
@@ -159,12 +161,11 @@ hpd.gamma <- list("hpd"=hpd,"hpd.t.occ.N"=hpd.t.occ.N)
 t.fore.mean <- as.vector(mod.mat[,6+K])
 
 
+write.csv(t(gelman),file=paste("../Results/GammaRes/GelmanDiag/GelmanDiagGamma",i,".csv",sep=""))
+save(hpd.gamma,file=paste("../Results/GammaRes/HPDGamma",i,".image",sep=""))
+
 }
 
-
-
-write.csv(t(gelman),file=paste("../Results/GammaRes/GelmanDiagGamma",i,".csv",sep=""))
-save(hpd.gamma,file=paste("../Results/GammaRes/HPDGamma",i,".image",sep=""))
 
 
 q()

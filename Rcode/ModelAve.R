@@ -1,3 +1,7 @@
+## Set the Working Directory to the "Rcode" folder
+#setwd("/PaleoEQ/Rcode")
+
+
 library(rjags)
 a <- dir("../DataFinal/chronologies_all_final")
 nfault <- length(a)

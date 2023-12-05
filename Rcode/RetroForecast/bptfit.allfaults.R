@@ -1,6 +1,9 @@
 # This file sources bptfitNoCensor.R and fits a bpt renewal process 
 # to the occurrence times from each fault segment.
 
+## Set the Working Directory to the "/Rcode/RetroForecast" folder
+#setwd("/PaleoEQ/Rcode/RetroForecast")
+
 # Load data
 a <- dir("../../DataFinal/chronologies_all_final")
 nfault <- length(a)
@@ -11,22 +14,22 @@ K = 100
 ## The values used in the manuscript are 
 n.iter.mc = 5010000 
 n.burnin.mc = 10000
-n.thin.mc=1000 
-gelman.cutoff <- 1.02
+n.thin.mc = 1000 
+gelman.cutoff = 1.02
 ## which are the default values in the bptfit.R file. 
 ## If one wants to test if the code runs properly, then use the following three
 ## lines to reduce the computational time, which most likely will not result in
 ## convergence of the MCMC chains, but can test that the code is running.
 #n.iter.mc = 6000
 #n.burnin.mc = 1000
-#n.thin.mc=1
-#gelman.cutoff <- 2
+#n.thin.mc = 100
+#gelman.cutoff = 5
 
 ## For convergence of MCMC chains, a minimum of the following values are suggested.
 # n.iter.mc = 55000
 # n.burnin.mc = 5000
-# n.thin.mc=10
-# gelman.cutoff <- 1.2
+# n.thin.mc = 10
+# gelman.cutoff = 1.2
 
 
 gelman <- matrix(NA,nrow=nfault,ncol=7)
@@ -171,11 +174,12 @@ hpd.bpt <- list("hpd"=hpd,"hpd.t.occ.N"=hpd.t.occ.N)
 
 bpt.res <- list("hpd.bpt"=hpd.bpt,"t.occ.N"=t.occ.N) 
 
-write.csv(t(gelman),file=paste("../../Results/bptSimRes2/GelmanDiagBPT",i,".csv",sep=""))
+write.csv(t(gelman),file=paste("../../Results/bptSimRes2/GelmanDiag/GelmanDiagBPT",i,".csv",sep=""))
 save(bpt.res,file=paste("../../Results/bptSimRes2/HPD-toccBPT",i,".image",sep=""))
 
 }
 
+q()
 
 
 

@@ -94,7 +94,7 @@ gammafit <- function(faulti,inter.NA, t.occ, N, K, isCensor, CensLim,
 	mod.mcmc <- as.mcmc(mod)
 
 ### Can use the code below to save the result in a .image file		
-#	save(mod.mcmc,file=paste("../Results/GammaRes/GammaFault-mcmc",faulti,".image",sep=""))
+	save(mod.mcmc,file=paste("../Results/GammaRes/GammaFault-mcmc",faulti,".image",sep=""))
 
 	return(mod.mcmc)
 	}

@@ -1,3 +1,7 @@
+## Set the Working Directory to the "/Rcode/RetroForecast" folder
+#setwd("/PaleoEQ/Rcode/RetroForecast")
+
+
 library(rjags)
 library(coda)
 library(actuar)
@@ -48,8 +52,6 @@ Noccur[faulti] <- N
 inter.cens = t(diff(t(t.occ.cens))) # Transpose, take difference and transpose back
 
 
-n.num <- n.mc
-fore.diff <- matrix(NA,n.num,K)
 toccurN.sd <- sd(as.vector(t.occ[1:K,N1]))
 toccurN.95CI <- as.numeric( diff( quantile(as.vector(t.occ[1:K,N1]),c(0.025,0.975)) )/2 )
 if (toccurN.sd <= 1) toccurN.sd <- 1
@@ -318,7 +320,7 @@ MAmse[faulti] <- MAbias[faulti]^2 + MAvar[faulti]
 write.csv(cbind(MAbias, MAvar, MAmse, poisbias, poisvar, poismse,
                gambias, gamvar, gammse, weibbias, weibvar, weibmse,
                bptbias, bptvar, bptmse, lnormbias, lnormvar, lnormmse),
-               "MAforeBiasVarMSE.csv")
+               "../../Results/MAforeBiasVarMSE.csv")
 
 
 ave.foreres <- list("modAveFore"=modAveFore,"Fore.Pois"=Fore.Pois, "Fore.gam"=Fore.gam,
@@ -326,9 +328,9 @@ ave.foreres <- list("modAveFore"=modAveFore,"Fore.Pois"=Fore.Pois, "Fore.gam"=Fo
                     "weights"=weights,"waic"=waic) 
 
 
-save(ave.foreres,file=paste("RetroModAveForeRes.image",sep=""))
+save(ave.foreres,file=paste("../../Results/RetroModAveForeRes.image",sep=""))
 
-write.csv(ave.foreres$weights,"RetroWAICweights.csv")
+write.csv(ave.foreres$weights,"../../Results/RetroWAICweights.csv")
 
 
 
@@ -388,7 +390,7 @@ params <- list("gam.alpha"=gam.alpha, "gam.beta"=gam.beta,
                "lnorm.mu"=lnorm.mu, "lnorm.sig"=lnorm.sig, 
 			   "bpt.alpha"=bpt.alpha,"bpt.mu"=bpt.mu)  
   
-save(params,file=paste("RetroParamEst.image",sep=""))
+save(params,file=paste("../../Results/RetroParamEst.image",sep=""))
  
 
 

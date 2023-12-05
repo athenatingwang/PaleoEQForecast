@@ -101,7 +101,7 @@ weibfit <- function(faulti,inter.NA, t.occ, N, K,
 	mod.mcmc <- as.mcmc(mod)
 	
 	### Can use the code below to save the result in a .image file		
-	#		save(mod.mcmc,file=paste("../../Results/WeibSimRes2/WeibFault-mcmc",faulti,".image",sep=""))
+	save(mod.mcmc,file=paste("../../Results/WeibSimRes2/WeibFault-mcmc",faulti,".image",sep=""))
 	
 	return(mod.mcmc)
 	}

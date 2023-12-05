@@ -16,7 +16,7 @@ All folders can be downloaded and saved in the same main folder. Inside the fold
 
 The .csv data files can be downloaded from https://github.com/griffij/QuakeRates/tree/master/chronologies_all_final. The .csv data files should be downloaded and saved in the folder "/DataFinal/chronologies_all_final/".  
 
-## The folder Demo contains the same .R files as the folder Rcode. The only difference is that these files use very small values for the MCMC iterations and thus take much less time to run. Due to this reason, if you run the Demo files you may encounter error messages when runnning the ModelAve.R file as the MCMC chains are not converged. The ResultsDemo.zip file contains all the sample results for which the ModelAve.R can run without errors. 
+## The folder "Demo" contains the same .R files as the folder "Rcode". The only difference is that the files in the "Demo" folder use very small values for the MCMC iterations and thus take much less time to run. Due to this reason, if you run the Demo files you may encounter error messages when runnning the ModelAve.R file as the MCMC chains are not converged. The ResultsDemo.zip file contains all the sample results for which the ModelAve.R can run without errors. 
 
 
 ## Software dependencies 

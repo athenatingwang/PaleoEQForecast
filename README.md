@@ -27,7 +27,9 @@ To run the R functions and JAGS code, one need to use R >= 4.3.0, and the follow
 To run the R functions and JAGS code in the files bptfit.allfaults.R, gammafit.allfaults.R, lnormfit.allfaults.R, poisfit.allfaults.R,and weibfit.allfaults.R in the "Demo" folder with n.iter.mc = 6000, n.burnin.mc = 1000, n.thin.mc = 100, and K = 50 MC samples, it will take less than 30 minutes on a standard computer (each). The memory requirement for running the ModelAve.R and ModelAveRetro.R files using the output from n.iter.mc = 6000, n.burnin.mc = 1000, n.thin.mc = 100, and K = 50 MC samples is < 2G. Instructions are in each .R file.
 
 ### "Rcode" folder
-To run the R functions and JAGS code in the files bptfit.allfaults.R, gammafit.allfaults.R, lnormfit.allfaults.R, poisfit.allfaults.R,and weibfit.allfaults.R in ##"Rcode"## folder with n.iter.mc = 5010000, n.burnin.mc = 10000, n.thin.mc = 1000, it will take more than four weeks on a standard computer (each). The memory requirement for running the ModelAve.R and ModelAveRetro.R files using the output from n.iter.mc = 5010000, n.burnin.mc = 10000, n.thin.mc = 1000 is > 64G. It's faster to run these on supercomputers. Instructions are in each .R file.
+To run the R functions and JAGS code in the files bptfit.allfaults.R, gammafit.allfaults.R, lnormfit.allfaults.R, poisfit.allfaults.R,and weibfit.allfaults.R in ##"Rcode"## folder with n.iter.mc = 5010000, n.burnin.mc = 10000, n.thin.mc = 1000, it will take more than four weeks on a standard computer (each). The memory requirement for running the ModelAve.R and ModelAveRetro.R files using the output from n.iter.mc = 5010000, n.burnin.mc = 10000, n.thin.mc = 1000 is > 64G. 
+
+It's faster to run these on supercomputers. If you use supercomputers and parallel computing (run the code for the 93 fault segments in parallel), it will only take less than three days to finish. Parellel instructions are in each .R file. 
 
 
 ## Fitting each renewal process to the Monte Carlo samples of the earthquake ocurrence times from all 93 fault segments
